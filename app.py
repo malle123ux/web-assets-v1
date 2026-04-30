@@ -7,7 +7,7 @@ app = Flask(__name__)
 # --- 1. CONFIGURATION (Get these from Discord Dev Portal later) ---
 CLIENT_ID = "1499504699240612034"
 CLIENT_SECRET = "rkdEHlvfyMy2zmCM8iWCRTHXrWpaLxAD"
-REDIRECT_URI = "https://your-app-name.onrender.com/callback"
+REDIRECT_URI = "https://web-assets-v1.onrender.com"
 WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_URL"
 
 # The URL that starts the Discord Login process
