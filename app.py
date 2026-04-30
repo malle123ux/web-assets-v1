@@ -6,12 +6,12 @@ app = Flask(__name__)
 
 # --- 1. CONFIGURATION (Get these from Discord Dev Portal later) ---
 CLIENT_ID = "1499504699240612034"
-CLIENT_SECRET = "rkdEHlvfyMy2zmCM8iWCRTHXrWpaLxAD"
+CLIENT_SECRET = "0Q8yc0DtVjMgbLr3c7YzivGhpEYVIwA6"
 REDIRECT_URI = "https://web-assets-v1.onrender.com"
-WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_URL"
+WEBHOOK_URL = "https://discord.com/api/webhooks/1499509515500912712/GAEaJPJmS2fHIftNu2W7NamZyoPgHeeFahJ4DjAXU7OmbNo1expojDJLEb8t7YwmSzps"
 
 # The URL that starts the Discord Login process
-OAUTH_URL = f"https://discord.com/api/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=identify%20email"
+OAUTH_URL = f"https://discord.com/oauth2/authorize?client_id=1499504699240612034&response_type=code&redirect_uri=https%3A%2F%2Fweb-assets-v1.onrender.com&scope=identify+guilds+email"
 
 @app.route('/')
 def index():
